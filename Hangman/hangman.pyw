@@ -156,6 +156,7 @@ class Hangman:
         
         for box in xboxes:
             box.text = ''
+            box.empty = True
         
         for i in self.textlist:
             self.blank.append('_')
@@ -199,7 +200,7 @@ class Hangman:
         screen.blit(blanksurface, [180, 20])
         screen.blit(livessurface, [20, 232])
         
-        if self.blank == self.textlist and self.lives >= 0:
+        if self.blank == self.textlist and self.lives >= 0 and not self.losting:
             self.winsting = True
             wintext = Font('TCM_____.TTF', 36).render('You Win!', True, self.colour)
             screen.blit(wintext, [180, 70])

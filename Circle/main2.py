@@ -85,11 +85,11 @@ class Drawer(pygame.sprite.Sprite):
         self.box_SP.update()
         self.box_SZ.update()
         try:
-            self.speed = int(self.box_SP.text)
+            self.speed = float(self.box_SP.text)
         except ValueError:
             pass
         try:
-            self.rad = int(self.box_SZ.text)
+            self.rad = min(int(self.box_SZ.text), 180)
         except ValueError:
             pass
 
