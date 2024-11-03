@@ -28,7 +28,7 @@ class Button:
         self.hover_colour = hover_colour
         self.press_colour = press_colour
         self.text = font.render(display_text, True, BLACK)
-        self.text_hitbox = self.text.get_rect(center=(self.box.x + self.box.w/2, self.box.y + self.box.y/2))
+        self.text_hitbox = self.text.get_rect(center=self.box.center)  # NOTE this change
         self.pressed = False
         
     def on_mouse_down(self):
