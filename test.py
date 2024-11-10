@@ -1,4 +1,5 @@
 import random
+from typing import Callable
 import unittest
 
 from main import Calcuator
@@ -26,6 +27,7 @@ class CalculatorTest(unittest.TestCase):
                 calc.buffer = case
                 randomSetHasDecimal()
                 randomSetNegative()
+                randomSetHasPut()
                 
                 calc.clear()
                 
@@ -35,7 +37,7 @@ class CalculatorTest(unittest.TestCase):
                 self.assertFalse(calc.clear_on_next_input)            
     
     
-    def testAddNumber(self):
+    def testInsertNumberChar(self):
         cases = [
             ("3", "3"),
             ("3777788", "3777788"),
@@ -47,7 +49,7 @@ class CalculatorTest(unittest.TestCase):
                               numbers=numbers, expected=expected):
                 calc = Calcuator()
                 for number in numbers:
-                    calc.add_number(number)
+                    calc.add_number_character(number)
                 self.assertEqual(calc.buffer, expected)
                                 
     
@@ -68,10 +70,10 @@ class CalculatorTest(unittest.TestCase):
                               first=first, second=second, expected=expected):
                 calc = Calcuator()
                 for number in first:
-                    calc.add_number(number)
+                    calc.add_number_character(number)
                 calc.add_decimal()
                 for number in second:
-                    calc.add_number(number)
+                    calc.add_number_character(number)
                 self.assertEqual(calc.buffer, expected)
                 if "." in expected:
                     self.assertTrue(calc.has_decimal)
@@ -135,7 +137,7 @@ class CalculatorTest(unittest.TestCase):
             calc = Calcuator()
             calc.buffer = "PUT"
             calc.clear_on_next_input = True 
-            calc.add_number("3")
+            calc.add_number_character("3")
             self.assertEqual(calc.buffer, "3")
             self.assertFalse(calc.clear_on_next_input)
             
@@ -173,6 +175,56 @@ class CalculatorTest(unittest.TestCase):
                 calc.do_square_root()
                 self.assertEqual(calc.buffer, expected)
                 self.assertTrue(calc.clear_on_next_input)
+    
+    
+    def testAddOp(self):
+        cases = [
+            ("122", "1334"),
+            ("199", "-2441"),
+            ("33.23", "9.31542435")
+        ]
+        
+        for n1, n2 in cases:
+            with self.subTest(f"Add op {n1} + {n2}"):
+                calc = Calcuator()
+                test_operator(self, calc, calc.do_add, lambda x, y: x + y, n1, n2)
+    
+    
+    
+@staticmethod
+def test_operator(this:CalculatorTest, calc:Calcuator, tested_op:Callable[[], None], intended_op:Callable[[float, float], float], n1:str, n2:str):
+    # calc = Calcuator()
+    
+    n1num = float(n1)
+    n2num = float(n2)
+    
+    if n1[0] == "-":
+        calc.toggle_negative()
+        n1 = n1[1:]
+    for n in n1:
+        calc.add_number_character(n)
+        
+    this.assertEqual(calc.buffer, n1)
+    
+    tested_op()
+    
+    this.assertEqual(calc.last_number, n1num)
+    this.assertEqual(calc.buffer, "")
+    this.assertEqual(calc.binary_operation(3, 7), intended_op(3, 7)) 
+    
+    if n2[0] == "-":
+        calc.toggle_negative()
+        n2 = n2[1:]
+    for n in n2:
+        calc.add_number_character(n)
+        
+    this.assertEqual(calc.buffer, n2)
+    
+    calc.do_equals()
+    
+    this.assertEqual(calc.last_number, 0)
+    this.assertAlmostEqual(float(calc.buffer) * (-1 if calc.negative else 1), intended_op(n1num, n2num))
+    this.assertTrue(calc.clear_on_next_input)
     
     
 def main():

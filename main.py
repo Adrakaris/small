@@ -1,4 +1,5 @@
 import math
+from typing import Callable
 from numpy import negative
 import pygame
 
@@ -64,10 +65,12 @@ class Calcuator:
         self.negative_sign_box = self.negative_sign.get_rect(center=(45, self.box.centery))
         
         self.buffer = ""
+        self.last_number = 0
+        self.binary_operation = lambda x, y : x
+        
         self.has_decimal = False
         self.negative = False
         self.clear_on_next_input = False 
-        
         
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(screen, (200, 200, 200), self.box)
@@ -80,7 +83,6 @@ class Calcuator:
         if self.negative:
             screen.blit(self.negative_sign, self.negative_sign_box)
             
-            
     def retrieve_number(self):
         if len(self.buffer) == 0:
             return 0.0
@@ -89,7 +91,6 @@ class Calcuator:
         if self.negative:
             num = -num 
         return num
-        
         
     def put_number(self, num:float):
         num_str = str(float(num))
@@ -121,14 +122,12 @@ class Calcuator:
 
         self.clear_on_next_input = True 
         
-       
     def put_error(self):
         self.buffer = "Error"
         self.negative = False
         self.clear_on_next_input = True
     
-        
-    def add_number(self, number:str):
+    def add_number_character(self, number:str):
         if self.clear_on_next_input:
             self.clear()
         
@@ -136,7 +135,6 @@ class Calcuator:
             return 
         
         self.buffer += number
-       
         
     def add_decimal(self):
         if self.clear_on_next_input:
@@ -148,14 +146,16 @@ class Calcuator:
         self.buffer += "."
         self.has_decimal = True
         
-        
     def toggle_negative(self):
         if self.clear_on_next_input:
             self.clear()
             
         self.negative = not self.negative
         
-    
+    def execute_operation(self, operation:Callable[[float, float], float]):
+        self.put_number(operation(self.last_number, self.retrieve_number()))
+        self.last_number = 0
+        
     def do_square_root(self):
         num = self.retrieve_number()
         
@@ -163,18 +163,21 @@ class Calcuator:
             self.put_error()
         else:        
             self.put_number(math.sqrt(self.retrieve_number()))    
-    
+            
+    def do_add(self):
+        self.last_number = self.retrieve_number()
+        self.binary_operation = lambda x, y: x + y
+        self.clear()
+            
+    def do_equals(self):
+        self.execute_operation(self.binary_operation)
         
     def clear(self):
         self.buffer = ""
         self.has_decimal = False
         self.negative = False 
         self.clear_on_next_input = False
-        
-        
-    def t_print_eval(self):
-        self.put_number(self.retrieve_number())
-        print(self.retrieve_number())
+    
 
 
 calculator = Calcuator()
@@ -185,7 +188,7 @@ def mouse_collides_with_box(box:pygame.Rect):
 def add_to_calculator(value):
     
     def inner():
-        calculator.add_number(value)
+        calculator.add_number_character(value)
     
     return inner
 
@@ -218,7 +221,7 @@ all_buttons = [
     make_green_button(add_to_calculator("-"), "-", 305, 410, 75, 75),
     make_grey_button(add_to_calculator("0"), "0", 20, 505, 75, 75),
     make_grey_button(calculator.add_decimal, ".", 115, 505, 75, 75),
-    make_green_button(calculator.t_print_eval, "=", 210, 505, 75, 75),
+    make_green_button(calculator.do_equals, "=", 210, 505, 75, 75),
     make_green_button(add_to_calculator("+"), "+", 305, 505, 75, 75)
 ]
 
