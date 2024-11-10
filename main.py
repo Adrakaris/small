@@ -1,3 +1,4 @@
+from numpy import negative
 import pygame
 
 pygame.init()
@@ -55,22 +56,59 @@ class Button:
 
 class Calcuator:
     def __init__(self) -> None:
-        self.buffer = ""
-        self.max_length = 10
         self.box = pygame.Rect(20, 20, 360, 85)
+        self.negative_sign = font.render("-", True, BLACK)
+        self.negative_sign_box = self.negative_sign.get_rect(center=(45, self.box.centery))
         
-    def draw(self, screen):
+        self.buffer = ""
+        self.max_length = 13
+        self.has_decimal = False
+        self.negative = False
+        
+    def draw(self, screen: pygame.Surface):
         pygame.draw.rect(screen, (200, 200, 200), self.box)
+        
+        text = font.render(self.buffer, True, BLACK)
+        text_box = text.get_rect(center=self.box.center)
+        text_box.x = (self.box.x + self.box.w) - text_box.w - 20
+        
+        screen.blit(text, text_box)
+        if self.negative:
+            screen.blit(self.negative_sign, self.negative_sign_box)
+        
+    def add_number(self, number):
+        if len(self.buffer) >= self.max_length:
+            return 
+        
+        self.buffer += number
+        
+    def add_decimal(self):
+        if self.has_decimal or len(self.buffer) >= self.max_length - 1:
+            return 
+        
+        self.buffer += "."
+        self.has_decimal = True
+        
+    def toggle_negative(self):
+        self.negative = not self.negative
+        
+    def clear(self):
+        self.buffer = ""
+        self.has_decimal = False
+        self.negative = False 
 
+
+calculator = Calcuator()
 
 def mouse_collides_with_box(box:pygame.Rect):
     return box.collidepoint(pygame.mouse.get_pos())
 
-def print_this(value):
-    def inner_print():
-        print(value)
+def add_to_calculator(value):
     
-    return inner_print
+    def inner():
+        calculator.add_number(value)
+    
+    return inner
 
 def make_green_button(on_clicked, text, x, y, width, height):
     return Button(on_clicked, pygame.Rect(x, y, width, height), text, GREEN_BUTTON, GREEN_BUTTON_HOVER, GREEN_BUTTON_PRESSED)
@@ -86,29 +124,29 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Calculator")
 
 all_buttons = [
-    make_green_button(print_this("^"), "^", 20, 125, 75, 75),
-    make_green_button(print_this("√"), "√", 115, 125, 75, 75),
-    make_green_button(print_this("±"), "±", 210, 125, 75, 75),
-    make_red_button(print_this("AC"), "AC", 305, 125, 75, 75),
-    make_grey_button(print_this("7"), "7", 20, 220, 75, 75),
-    make_grey_button(print_this("8"), "8", 115, 220, 75, 75),
-    make_grey_button(print_this("9"), "9", 210, 220, 75, 75),
-    make_green_button(print_this("÷"), "÷", 305, 220, 75, 75),
-    make_grey_button(print_this("4"), "4", 20, 315, 75, 75),
-    make_grey_button(print_this("5"), "5", 115, 315, 75, 75),
-    make_grey_button(print_this("6"), "6", 210, 315, 75, 75),
-    make_green_button(print_this("×"), "×", 305, 315, 75, 75),
-    make_grey_button(print_this("1"), "1", 20, 410, 75, 75),
-    make_grey_button(print_this("2"), "2", 115, 410, 75, 75),
-    make_grey_button(print_this("3"), "3", 210, 410, 75, 75),
-    make_green_button(print_this("-"), "-", 305, 410, 75, 75),
-    make_grey_button(print_this("0"), "0", 20, 505, 75, 75),
-    make_grey_button(print_this("."), ".", 115, 505, 75, 75),
-    make_green_button(print_this("="), "=", 210, 505, 75, 75),
-    make_green_button(print_this("+"), "+", 305, 505, 75, 75)
+    make_green_button(add_to_calculator("^"), "^", 20, 125, 75, 75),
+    make_green_button(add_to_calculator("√"), "√", 115, 125, 75, 75),
+    make_green_button(calculator.toggle_negative, "±", 210, 125, 75, 75),
+    make_red_button(calculator.clear, "AC", 305, 125, 75, 75),
+    make_grey_button(add_to_calculator("7"), "7", 20, 220, 75, 75),
+    make_grey_button(add_to_calculator("8"), "8", 115, 220, 75, 75),
+    make_grey_button(add_to_calculator("9"), "9", 210, 220, 75, 75),
+    make_green_button(add_to_calculator("÷"), "÷", 305, 220, 75, 75),
+    make_grey_button(add_to_calculator("4"), "4", 20, 315, 75, 75),
+    make_grey_button(add_to_calculator("5"), "5", 115, 315, 75, 75),
+    make_grey_button(add_to_calculator("6"), "6", 210, 315, 75, 75),
+    make_green_button(add_to_calculator("×"), "×", 305, 315, 75, 75),
+    make_grey_button(add_to_calculator("1"), "1", 20, 410, 75, 75),
+    make_grey_button(add_to_calculator("2"), "2", 115, 410, 75, 75),
+    make_grey_button(add_to_calculator("3"), "3", 210, 410, 75, 75),
+    make_green_button(add_to_calculator("-"), "-", 305, 410, 75, 75),
+    make_grey_button(add_to_calculator("0"), "0", 20, 505, 75, 75),
+    make_grey_button(calculator.add_decimal, ".", 115, 505, 75, 75),
+    make_green_button(add_to_calculator("="), "=", 210, 505, 75, 75),
+    make_green_button(add_to_calculator("+"), "+", 305, 505, 75, 75)
 ]
 
-calculator = Calcuator()
+
 
 done = False 
 while not done:
