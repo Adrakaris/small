@@ -93,6 +93,8 @@ class Calcuator:
         return num
         
     def put_number(self, num:float):
+        self.clear()
+        
         num_str = str(float(num))
         
         split = num_str.split("e")
@@ -153,7 +155,10 @@ class Calcuator:
         self.negative = not self.negative
         
     def execute_operation(self, operation:Callable[[float, float], float]):
-        self.put_number(operation(self.last_number, self.retrieve_number()))
+        try:
+            self.put_number(operation(self.last_number, self.retrieve_number()))
+        except (OverflowError, ZeroDivisionError):
+            self.put_error()
         self.last_number = 0
         
     def do_square_root(self):
@@ -165,12 +170,44 @@ class Calcuator:
             self.put_number(math.sqrt(self.retrieve_number()))    
             
     def do_add(self):
-        self.last_number = self.retrieve_number()
+        if self.buffer != "":
+            self.last_number = self.retrieve_number()
         self.binary_operation = lambda x, y: x + y
+        self.clear()
+        
+    def do_subtract(self):
+        if self.buffer != "":
+            self.last_number = self.retrieve_number()
+        self.binary_operation = lambda x, y: x - y 
+        self.clear()
+        
+    def do_multiply(self):
+        if self.buffer != "":
+            self.last_number = self.retrieve_number()
+        self.binary_operation = lambda x, y: x * y 
+        self.clear()
+
+    def do_divide(self):
+        if self.buffer != "":
+            self.last_number = self.retrieve_number()
+        self.binary_operation = lambda x, y: x / y 
+        self.clear()
+        
+    def do_power(self):
+        def power(x, y):
+            # shortcut and throw an error if exponent base pair is too large for most cases for efficiency
+            if x >= 2 and y >= 2000:
+                raise OverflowError()
+            return x ** y 
+        
+        if self.buffer != "":
+            self.last_number = self.retrieve_number()
+        self.binary_operation = power
         self.clear()
             
     def do_equals(self):
         self.execute_operation(self.binary_operation)
+        self.last_number = 0
         
     def clear(self):
         self.buffer = ""
@@ -203,26 +240,26 @@ def make_grey_button(on_clicked, text, x, y, width, height):
 
 
 all_buttons = [
-    make_green_button(add_to_calculator("^"), "^", 20, 125, 75, 75),
+    make_green_button(calculator.do_power, "^", 20, 125, 75, 75),
     make_green_button(calculator.do_square_root, "√", 115, 125, 75, 75),
     make_green_button(calculator.toggle_negative, "±", 210, 125, 75, 75),
     make_red_button(calculator.clear, "AC", 305, 125, 75, 75),
     make_grey_button(add_to_calculator("7"), "7", 20, 220, 75, 75),
     make_grey_button(add_to_calculator("8"), "8", 115, 220, 75, 75),
     make_grey_button(add_to_calculator("9"), "9", 210, 220, 75, 75),
-    make_green_button(add_to_calculator("÷"), "÷", 305, 220, 75, 75),
+    make_green_button(calculator.do_divide, "÷", 305, 220, 75, 75),
     make_grey_button(add_to_calculator("4"), "4", 20, 315, 75, 75),
     make_grey_button(add_to_calculator("5"), "5", 115, 315, 75, 75),
     make_grey_button(add_to_calculator("6"), "6", 210, 315, 75, 75),
-    make_green_button(add_to_calculator("×"), "×", 305, 315, 75, 75),
+    make_green_button(calculator.do_multiply, "×", 305, 315, 75, 75),
     make_grey_button(add_to_calculator("1"), "1", 20, 410, 75, 75),
     make_grey_button(add_to_calculator("2"), "2", 115, 410, 75, 75),
     make_grey_button(add_to_calculator("3"), "3", 210, 410, 75, 75),
-    make_green_button(add_to_calculator("-"), "-", 305, 410, 75, 75),
+    make_green_button(calculator.do_subtract, "-", 305, 410, 75, 75),
     make_grey_button(add_to_calculator("0"), "0", 20, 505, 75, 75),
     make_grey_button(calculator.add_decimal, ".", 115, 505, 75, 75),
     make_green_button(calculator.do_equals, "=", 210, 505, 75, 75),
-    make_green_button(add_to_calculator("+"), "+", 305, 505, 75, 75)
+    make_green_button(calculator.do_add, "+", 305, 505, 75, 75)
 ]
 
 def main():

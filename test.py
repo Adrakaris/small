@@ -188,43 +188,120 @@ class CalculatorTest(unittest.TestCase):
             with self.subTest(f"Add op {n1} + {n2}"):
                 calc = Calcuator()
                 test_operator(self, calc, calc.do_add, lambda x, y: x + y, n1, n2)
+                
+    
+    def testSubtractOp(self):
+        cases = [
+            ("122", "1334"),
+            ("199", "-2441"),
+            ("33.23", "9.31542435")
+        ]
+        
+        for n1, n2 in cases:
+            with self.subTest(f"Sub op {n1} - {n2}"):
+                calc = Calcuator()
+                test_operator(self, calc, calc.do_subtract, lambda x, y: x - y, n1, n2)
+                
+                
+    def testMultOp(self):
+        cases = [
+            ("122", "1334"),
+            ("199", "-2441"),
+            ("33.23", "9.31542435")
+        ]
+        
+        for n1, n2 in cases:
+            with self.subTest(f"Sub op {n1} - {n2}"):
+                calc = Calcuator()
+                test_operator(self, calc, calc.do_multiply, lambda x, y: x * y, n1, n2)
+                
+    
+    def testDivOp(self):
+        cases = [
+            ("122", "1334"),
+            ("199", "-2441"),
+            ("33.23", "9.31542435")
+        ]
+        
+        for n1, n2 in cases:
+            with self.subTest(f"Sub op {n1} - {n2}"):
+                calc = Calcuator()
+                test_operator(self, calc, calc.do_divide, lambda x, y: x / y, n1, n2)
+                
+                
+    def testPowerOp(self):
+        cases = [
+            ("6", "3"),
+            ("4", "-4"),
+            ("13.23", "2.31542435")
+        ]
+        
+        for n1, n2 in cases:
+            with self.subTest(f"Sub op {n1} - {n2}"):
+                calc = Calcuator()
+                test_operator(self, calc, calc.do_power, lambda x, y: x ** y, n1, n2)
     
     
+    def testExceptionalCases(self):
+        calc = Calcuator()
+        cases = [
+            ("2", "0", calc.do_divide),
+            ("99", "999", calc.do_power)
+        ]
+        
+        for n1, n2, op in cases:
+            with self.subTest("Exception cases",
+                              n1=n1, n2=n2, op=op):
+                addToCalc(calc, n1)
+                op()
+                addToCalc(calc, n2)
+                
+                calc.do_equals()
+                
+                self.assertEqual(calc.buffer, "Error")
+                
+                calc.clear()
+                
     
-@staticmethod
-def test_operator(this:CalculatorTest, calc:Calcuator, tested_op:Callable[[], None], intended_op:Callable[[float, float], float], n1:str, n2:str):
-    # calc = Calcuator()
+def addToCalc(calc:Calcuator, num:str):
+    if num[0] == "-":
+        calc.toggle_negative()
+        num = num[1:]
+    for n in num:
+        calc.add_number_character(n)
+        
+        
+def assertEqualNegative(tester:CalculatorTest, buffer:str, num:str):
+    if num[0] == "-":
+        tester.assertEqual(buffer, num[1:])
+    else:
+        tester.assertEqual(buffer, num)
+    
+    
+def test_operator(tester:CalculatorTest, calc:Calcuator, tested_op:Callable[[], None], intended_op:Callable[[float, float], float], n1:str, n2:str):
     
     n1num = float(n1)
     n2num = float(n2)
     
-    if n1[0] == "-":
-        calc.toggle_negative()
-        n1 = n1[1:]
-    for n in n1:
-        calc.add_number_character(n)
+    addToCalc(calc, n1)
         
-    this.assertEqual(calc.buffer, n1)
+    assertEqualNegative(tester, calc.buffer, n1)
     
     tested_op()
     
-    this.assertEqual(calc.last_number, n1num)
-    this.assertEqual(calc.buffer, "")
-    this.assertEqual(calc.binary_operation(3, 7), intended_op(3, 7)) 
+    tester.assertEqual(calc.last_number, n1num)
+    tester.assertEqual(calc.buffer, "")
+    tester.assertEqual(calc.binary_operation(3, 7), intended_op(3, 7)) 
     
-    if n2[0] == "-":
-        calc.toggle_negative()
-        n2 = n2[1:]
-    for n in n2:
-        calc.add_number_character(n)
+    addToCalc(calc, n2)
         
-    this.assertEqual(calc.buffer, n2)
+    assertEqualNegative(tester, calc.buffer, n2)
     
     calc.do_equals()
     
-    this.assertEqual(calc.last_number, 0)
-    this.assertAlmostEqual(float(calc.buffer) * (-1 if calc.negative else 1), intended_op(n1num, n2num))
-    this.assertTrue(calc.clear_on_next_input)
+    tester.assertEqual(calc.last_number, 0)
+    tester.assertAlmostEqual(float(calc.buffer) * (-1 if calc.negative else 1), intended_op(n1num, n2num))
+    tester.assertTrue(calc.clear_on_next_input)
     
     
 def main():
