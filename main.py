@@ -1,3 +1,4 @@
+import math
 from numpy import negative
 import pygame
 
@@ -65,7 +66,7 @@ class Calcuator:
         self.buffer = ""
         self.has_decimal = False
         self.negative = False
-        self.has_put_number = False 
+        self.clear_on_next_input = False 
         
         
     def draw(self, screen: pygame.Surface):
@@ -80,7 +81,7 @@ class Calcuator:
             screen.blit(self.negative_sign, self.negative_sign_box)
             
             
-    def evaluate(self):
+    def retrieve_number(self):
         if len(self.buffer) == 0:
             return 0.0
         
@@ -118,11 +119,17 @@ class Calcuator:
                 second = ""
             self.buffer = first + second + exponent
 
-        self.has_put_number = True 
+        self.clear_on_next_input = True 
         
+       
+    def put_error(self):
+        self.buffer = "Error"
+        self.negative = False
+        self.clear_on_next_input = True
+    
         
     def add_number(self, number:str):
-        if self.has_put_number:
+        if self.clear_on_next_input:
             self.clear()
         
         if len(self.buffer) >= self.max_length:
@@ -132,7 +139,7 @@ class Calcuator:
        
         
     def add_decimal(self):
-        if self.has_put_number:
+        if self.clear_on_next_input:
             self.clear()
             
         if self.has_decimal or len(self.buffer) >= self.max_length - 1:
@@ -143,21 +150,31 @@ class Calcuator:
         
         
     def toggle_negative(self):
-        if self.has_put_number:
+        if self.clear_on_next_input:
             self.clear()
             
         self.negative = not self.negative
         
+    
+    def do_square_root(self):
+        num = self.retrieve_number()
+        
+        if num < 0:
+            self.put_error()
+        else:        
+            self.put_number(math.sqrt(self.retrieve_number()))    
+    
         
     def clear(self):
         self.buffer = ""
         self.has_decimal = False
         self.negative = False 
-        self.has_put_number = False
+        self.clear_on_next_input = False
         
         
     def t_print_eval(self):
-        print(self.evaluate())
+        self.put_number(self.retrieve_number())
+        print(self.retrieve_number())
 
 
 calculator = Calcuator()
@@ -184,7 +201,7 @@ def make_grey_button(on_clicked, text, x, y, width, height):
 
 all_buttons = [
     make_green_button(add_to_calculator("^"), "^", 20, 125, 75, 75),
-    make_green_button(add_to_calculator("√"), "√", 115, 125, 75, 75),
+    make_green_button(calculator.do_square_root, "√", 115, 125, 75, 75),
     make_green_button(calculator.toggle_negative, "±", 210, 125, 75, 75),
     make_red_button(calculator.clear, "AC", 305, 125, 75, 75),
     make_grey_button(add_to_calculator("7"), "7", 20, 220, 75, 75),

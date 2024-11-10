@@ -17,7 +17,7 @@ class CalculatorTest(unittest.TestCase):
             calc.negative = bool(random.randint(0, 1))
         
         def randomSetHasPut():
-            calc.has_put_number = bool(random.randint(0, 1))
+            calc.clear_on_next_input = bool(random.randint(0, 1))
         
         for case in cases:
             with self.subTest(f"clears {case} and all booleans",
@@ -32,7 +32,7 @@ class CalculatorTest(unittest.TestCase):
                 self.assertEqual(calc.buffer, "")
                 self.assertFalse(calc.negative)
                 self.assertFalse(calc.has_decimal)    
-                self.assertFalse(calc.has_put_number)            
+                self.assertFalse(calc.clear_on_next_input)            
     
     
     def testAddNumber(self):
@@ -94,7 +94,7 @@ class CalculatorTest(unittest.TestCase):
                 calc = Calcuator()
                 calc.buffer = text
                 calc.negative = negative
-                self.assertEqual(calc.evaluate(), expected)
+                self.assertEqual(calc.retrieve_number(), expected)
                 
     def testPutNumber(self):
         cases = [
@@ -127,34 +127,52 @@ class CalculatorTest(unittest.TestCase):
                 self.assertEqual(calc.buffer, expected)
                 if num < 0:
                     self.assertTrue(calc.negative)
-                self.assertTrue(calc.has_put_number)
+                self.assertTrue(calc.clear_on_next_input)
     
     
     def testAddThings_whenAlreadyPutNumber(self):
         with self.subTest("addNumber"):
             calc = Calcuator()
             calc.buffer = "PUT"
-            calc.has_put_number = True 
+            calc.clear_on_next_input = True 
             calc.add_number("3")
             self.assertEqual(calc.buffer, "3")
-            self.assertFalse(calc.has_put_number)
+            self.assertFalse(calc.clear_on_next_input)
             
         with self.subTest("addDecimal"):
             calc = Calcuator()
             calc.buffer = "PUT"
-            calc.has_put_number = True 
+            calc.clear_on_next_input = True 
             calc.add_decimal()
             self.assertEqual(calc.buffer, ".")
-            self.assertFalse(calc.has_put_number)
+            self.assertFalse(calc.clear_on_next_input)
             
         with self.subTest("toggleNegative"):
             calc = Calcuator()
             calc.buffer = "PUT"
-            calc.has_put_number = True 
+            calc.clear_on_next_input = True 
             calc.toggle_negative()
             self.assertEqual(calc.buffer, "")
             self.assertTrue(calc.negative)
-            self.assertFalse(calc.has_put_number)
+            self.assertFalse(calc.clear_on_next_input)
+    
+    
+    def testSquareRoot(self):
+        cases = [
+            ("4", False, "2"),
+            ("0", False, "0"),
+            ("1", True, "Error")
+        ]
+        
+        for num, neg, expected in cases:
+            with self.subTest(f"Test sqrt works on {'-' if neg else ''}{num}",
+                              num=num, neg=neg, expected=expected):
+                calc = Calcuator()
+                calc.buffer = num
+                calc.negative = neg
+                calc.do_square_root()
+                self.assertEqual(calc.buffer, expected)
+                self.assertTrue(calc.clear_on_next_input)
     
     
 def main():
