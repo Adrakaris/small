@@ -55,15 +55,18 @@ class Button:
 
 
 class Calcuator:
+    max_length = 13
+    
     def __init__(self) -> None:
         self.box = pygame.Rect(20, 20, 360, 85)
         self.negative_sign = font.render("-", True, BLACK)
         self.negative_sign_box = self.negative_sign.get_rect(center=(45, self.box.centery))
         
         self.buffer = ""
-        self.max_length = 13
         self.has_decimal = False
         self.negative = False
+        self.has_put_number = False 
+        
         
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(screen, (200, 200, 200), self.box)
@@ -75,27 +78,86 @@ class Calcuator:
         screen.blit(text, text_box)
         if self.negative:
             screen.blit(self.negative_sign, self.negative_sign_box)
+            
+            
+    def evaluate(self):
+        if len(self.buffer) == 0:
+            return 0.0
         
-    def add_number(self, number):
+        num = float(self.buffer)
+        if self.negative:
+            num = -num 
+        return num
+        
+        
+    def put_number(self, num:float):
+        num_str = str(float(num))
+        
+        split = num_str.split("e")
+        decimal = split[0]
+        exponent = "e" + split[1][1:] if len(split) > 1 else ""
+        
+        split = decimal.split(".")
+        major_digits = split[0]
+        minor_digits = split[1] if len(split) > 1 and split[1] != "0" else ""
+        
+        if major_digits[0] == "-":
+            major_digits = major_digits[1:]
+            self.negative = True
+               
+        if len(major_digits) > self.max_length:
+            exponent = f"e{len(major_digits) - 1}"
+            first = major_digits[0]
+            second = major_digits[1:self.max_length - len(exponent) - 1]
+            self.buffer = first + "." + second + exponent
+        else:
+            first = major_digits[:self.max_length - len(exponent)]
+            if minor_digits:
+                second = "." + minor_digits[:self.max_length - len(exponent) - len(first) - 1]
+            else:
+                second = ""
+            self.buffer = first + second + exponent
+
+        self.has_put_number = True 
+        
+        
+    def add_number(self, number:str):
+        if self.has_put_number:
+            self.clear()
+        
         if len(self.buffer) >= self.max_length:
             return 
         
         self.buffer += number
+       
         
     def add_decimal(self):
+        if self.has_put_number:
+            self.clear()
+            
         if self.has_decimal or len(self.buffer) >= self.max_length - 1:
             return 
         
         self.buffer += "."
         self.has_decimal = True
         
+        
     def toggle_negative(self):
+        if self.has_put_number:
+            self.clear()
+            
         self.negative = not self.negative
+        
         
     def clear(self):
         self.buffer = ""
         self.has_decimal = False
         self.negative = False 
+        self.has_put_number = False
+        
+        
+    def t_print_eval(self):
+        print(self.evaluate())
 
 
 calculator = Calcuator()
@@ -120,9 +182,6 @@ def make_grey_button(on_clicked, text, x, y, width, height):
     return Button(on_clicked, pygame.Rect(x, y, width, height), text, GREY_BUTTON, GREY_BUTTON_HOVER, GREY_BUTTON_PRESSED)
 
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Calculator")
-
 all_buttons = [
     make_green_button(add_to_calculator("^"), "^", 20, 125, 75, 75),
     make_green_button(add_to_calculator("√"), "√", 115, 125, 75, 75),
@@ -142,35 +201,41 @@ all_buttons = [
     make_green_button(add_to_calculator("-"), "-", 305, 410, 75, 75),
     make_grey_button(add_to_calculator("0"), "0", 20, 505, 75, 75),
     make_grey_button(calculator.add_decimal, ".", 115, 505, 75, 75),
-    make_green_button(add_to_calculator("="), "=", 210, 505, 75, 75),
+    make_green_button(calculator.t_print_eval, "=", 210, 505, 75, 75),
     make_green_button(add_to_calculator("+"), "+", 305, 505, 75, 75)
 ]
 
+def main():
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Calculator")
+    
+    done = False 
+    while not done:
+        # update
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True 
+                
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for button in all_buttons:
+                    button.on_mouse_down()
+                
+            if event.type == pygame.MOUSEBUTTONUP:
+                for button in all_buttons:
+                    button.on_mouse_up()
+        
+        # draw
+        screen.fill(WHITE)
+        
+        for button in all_buttons:
+            button.draw(screen)
+        calculator.draw(screen)
+        
+        pygame.display.flip()
+        clock.tick(FPS)
+        
+    pygame.quit()
 
 
-done = False 
-while not done:
-    # update
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True 
-            
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            for button in all_buttons:
-                button.on_mouse_down()
-            
-        if event.type == pygame.MOUSEBUTTONUP:
-            for button in all_buttons:
-                button.on_mouse_up()
-    
-    # draw
-    screen.fill(WHITE)
-    
-    for button in all_buttons:
-        button.draw(screen)
-    calculator.draw(screen)
-    
-    pygame.display.flip()
-    clock.tick(FPS)
-    
-pygame.quit()
+if __name__ == "__main__":
+    main()
