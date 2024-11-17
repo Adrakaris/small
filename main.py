@@ -64,6 +64,7 @@ class Calcuator:
         self.max_length = 13
         self.has_decimal = False
         self.negative = False
+        self.clear_on_next_action = False 
         
     def draw(self, screen: pygame.Surface):
         pygame.draw.rect(screen, (200, 200, 200), self.box)
@@ -75,14 +76,31 @@ class Calcuator:
         screen.blit(text, text_box)
         if self.negative:
             screen.blit(self.negative_sign, self.negative_sign_box)
+            
+    def convert_buffer_to_decimal(self):
+        if len(self.buffer) == 0:
+            return 0.0
+        
+        num = float(self.buffer)
+        
+        if self.negative:
+            num = -num
+        
+        return num
         
     def add_number(self, number):
+        if self.clear_on_next_action:
+            self.clear()
+        
         if len(self.buffer) >= self.max_length:
             return 
         
         self.buffer += number
         
     def add_decimal(self):
+        if self.clear_on_next_action:
+            self.clear()        
+        
         if self.has_decimal or len(self.buffer) >= self.max_length - 1:
             return 
         
@@ -90,12 +108,20 @@ class Calcuator:
         self.has_decimal = True
         
     def toggle_negative(self):
+        if self.clear_on_next_action:
+            self.clear()     
+            
         self.negative = not self.negative
         
     def clear(self):
         self.buffer = ""
         self.has_decimal = False
         self.negative = False 
+        self.clear_on_next_action = False
+        
+    def print_eval(self):
+        print(self.convert_buffer_to_decimal())
+        self.clear_on_next_action = True
 
 
 calculator = Calcuator()
@@ -142,7 +168,7 @@ all_buttons = [
     make_green_button(add_to_calculator("-"), "-", 305, 410, 75, 75),
     make_grey_button(add_to_calculator("0"), "0", 20, 505, 75, 75),
     make_grey_button(calculator.add_decimal, ".", 115, 505, 75, 75),
-    make_green_button(add_to_calculator("="), "=", 210, 505, 75, 75),
+    make_green_button(calculator.print_eval, "=", 210, 505, 75, 75),
     make_green_button(add_to_calculator("+"), "+", 305, 505, 75, 75)
 ]
 
@@ -174,3 +200,4 @@ while not done:
     clock.tick(FPS)
     
 pygame.quit()
+
