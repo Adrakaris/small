@@ -1,4 +1,5 @@
 import pygame
+import math
 
 pygame.init()
 
@@ -53,6 +54,9 @@ class Button:
         screen.blit(self.text, self.text_hitbox)
 
 
+def nothing(x, y): 
+    return y
+
 class Calculator:
     def __init__(self) -> None:
         self.box = pygame.Rect(20, 20, 360, 85)
@@ -60,6 +64,11 @@ class Calculator:
         self.negative_sign_box = self.negative_sign.get_rect(center=(45, self.box.centery))
         
         self.buffer = ""
+        self.last_number = 0
+        
+        
+        self.operation = nothing
+        
         self.max_length = 13
         self.has_decimal = False
         self.negative = False
@@ -104,6 +113,12 @@ class Calculator:
         else:
             decimal_part = ""
             
+        if whole_part[0] == "-":
+            whole_part = whole_part[1:]
+            self.negative = True
+        else:
+            self.negative = False
+            
         if len(whole_part) > self.max_length:
             exponent = "e" + str(len(whole_part) - 1)
             first = whole_part[0]
@@ -119,7 +134,6 @@ class Calculator:
         
         self.clear_on_next_action = True 
                 
-               
     def add_number(self, number):
         if self.clear_on_next_action:
             self.clear()
@@ -150,6 +164,36 @@ class Calculator:
         self.has_decimal = False
         self.negative = False 
         self.clear_on_next_action = False
+        
+    def error(self):
+        self.buffer = "Error"
+        self.negative = False
+        self.clear_on_next_action = True
+        
+    def do_square_root(self):
+        num = self.convert_buffer_to_decimal()
+        
+        if num >= 0:
+            self.put_decimal_in_buffer(math.sqrt(num))
+        else:
+            self.error()
+    
+    def do_add(self):
+        def add(x, y):
+            return x + y 
+
+        self.operation = add 
+        if self.buffer != "":
+            self.last_number = self.convert_buffer_to_decimal()
+        self.clear()
+        
+    def do_equals(self):
+        result = self.operation(self.last_number, self.convert_buffer_to_decimal())
+        self.put_decimal_in_buffer(result)
+        
+        self.last_number = 0
+        self.clear_on_next_action = True
+        self.operation = nothing
         
     def print_eval(self):
         print(self.convert_buffer_to_decimal())
@@ -183,7 +227,7 @@ pygame.display.set_caption("Calculator")
 
 all_buttons = [
     make_green_button(add_to_calculator("^"), "^", 20, 125, 75, 75),
-    make_green_button(add_to_calculator("√"), "√", 115, 125, 75, 75),
+    make_green_button(calculator.do_square_root, "√", 115, 125, 75, 75),
     make_green_button(calculator.toggle_negative, "±", 210, 125, 75, 75),
     make_red_button(calculator.clear, "AC", 305, 125, 75, 75),
     make_grey_button(add_to_calculator("7"), "7", 20, 220, 75, 75),
@@ -200,8 +244,8 @@ all_buttons = [
     make_green_button(add_to_calculator("-"), "-", 305, 410, 75, 75),
     make_grey_button(add_to_calculator("0"), "0", 20, 505, 75, 75),
     make_grey_button(calculator.add_decimal, ".", 115, 505, 75, 75),
-    make_green_button(calculator.print_eval, "=", 210, 505, 75, 75),
-    make_green_button(add_to_calculator("+"), "+", 305, 505, 75, 75)
+    make_green_button(calculator.do_equals, "=", 210, 505, 75, 75),
+    make_green_button(calculator.do_add, "+", 305, 505, 75, 75)
 ]
 
 
