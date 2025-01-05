@@ -1,4 +1,3 @@
-from numpy import negative
 import pygame
 
 pygame.init()
@@ -54,7 +53,7 @@ class Button:
         screen.blit(self.text, self.text_hitbox)
 
 
-class Calcuator:
+class Calculator:
     def __init__(self) -> None:
         self.box = pygame.Rect(20, 20, 360, 85)
         self.negative_sign = font.render("-", True, BLACK)
@@ -87,7 +86,40 @@ class Calcuator:
             num = -num
         
         return num
+    
+    def put_decimal_in_buffer(self, number):
+        num_str = str(float(number))
         
+        split_at_e = num_str.split("e")
+        decimal = split_at_e[0]
+        if len(split_at_e) > 1:
+            exponent = split_at_e[1]
+        else:
+            exponent = ""
+            
+        split_at_dot = decimal.split(".")
+        whole_part = split_at_dot[0]
+        if len(split_at_dot) > 1 and split_at_dot[1] != "0":
+            decimal_part = split_at_dot[1]
+        else:
+            decimal_part = ""
+            
+        if len(whole_part) > self.max_length:
+            exponent = "e" + str(len(whole_part) - 1)
+            first = whole_part[0]
+            second = whole_part[1:self.max_length - len(exponent) - 1]
+            self.buffer = first + "." + second + exponent
+        else:
+            first = whole_part[0:self.max_length - len(exponent)]
+            if decimal_part != "":
+                second = "." + decimal_part[0:self.max_length - len(exponent) - len(first) - 1]
+            else:
+                second = ""
+            self.buffer = first + second + exponent 
+        
+        self.clear_on_next_action = True 
+                
+               
     def add_number(self, number):
         if self.clear_on_next_action:
             self.clear()
@@ -124,7 +156,7 @@ class Calcuator:
         self.clear_on_next_action = True
 
 
-calculator = Calcuator()
+calculator = Calculator()
 
 def mouse_collides_with_box(box:pygame.Rect):
     return box.collidepoint(pygame.mouse.get_pos())
