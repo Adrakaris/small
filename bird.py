@@ -1,0 +1,42 @@
+import pygame
+
+from constants import HEIGHT 
+
+HITBOX_RADIUS = 30
+GRAVITY = 0.5  # pixels per frame^2
+TERMINAL_VELOCITY = 10
+
+
+class Bird:
+    
+    def __init__(self, inital_x:int, initial_y: int) -> None:
+        self.centre_x = inital_x
+        self.centre_y = initial_y
+        self.radius = HITBOX_RADIUS
+        self.velocity_y = 0
+        
+    def draw(self, screen:pygame.Surface):
+        pygame.draw.rect(screen, "red", self.hitbox())
+        
+    def update(self):
+        hitbox = self.hitbox()
+        
+        # since y increases as you go down, we ADD to go down 
+        self.centre_y += self.velocity_y
+        self.velocity_y += GRAVITY
+        
+        # preventing the bird from falling too quickly
+        if self.velocity_y >= TERMINAL_VELOCITY:
+            self.velocity_y = TERMINAL_VELOCITY
+            
+        if hitbox.bottom >= HEIGHT:
+            self.velocity_y = 0
+            self.centre_y = HEIGHT - self.radius
+        
+    def hitbox(self) -> pygame.Rect:
+        return pygame.Rect(
+            self.centre_x - self.radius,  # left
+            self.centre_y - self.radius,  # right
+            2*self.radius,  # width
+            2*self.radius  # height
+        )

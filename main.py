@@ -1,12 +1,19 @@
 import pygame
 
+from bird import Bird
+from constants import FRAMERATE, HEIGHT, WIDTH
+
 pygame.init()
 
-WIDTH = 1280
-HEIGHT = 720
-FRAMERATE = 60
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
+clock = pygame.time.Clock() 
+
+
+BIRD_STARTING_X = 480
+BIRD_STARTING_Y = HEIGHT // 2
+
+bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
+
 
 done = False 
 
@@ -19,9 +26,12 @@ while not done:
             done = True
     
     # update logic and physics
+    bird.update()
     
     # draw stuff!
     screen.fill("white")  # todo: hex codes
+    
+    bird.draw(screen)
     
     pygame.display.flip()
     clock.tick(FRAMERATE)    
