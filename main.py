@@ -2,6 +2,7 @@ import pygame
 
 from bird import Bird
 from constants import FRAMERATE, HEIGHT, WIDTH
+from pipe import PipePair
 
 pygame.init()
 
@@ -13,7 +14,7 @@ BIRD_STARTING_X = 480
 BIRD_STARTING_Y = HEIGHT // 2
 
 bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
-
+pipes = [PipePair(700, 300, 200)]
 
 done = False 
 
@@ -34,6 +35,8 @@ while not done:
     # draw stuff!
     screen.fill("white")  # todo: hex codes
     
+    for pipe in pipes:
+        pipe.draw(screen)
     bird.draw(screen)
     
     pygame.display.flip()
