@@ -5,6 +5,7 @@ from constants import HEIGHT
 HITBOX_RADIUS = 30
 GRAVITY = 0.5  # pixels per frame^2
 TERMINAL_VELOCITY = 10
+JUMP_STRENGTH = -10  # up is negative
 
 
 class Bird:
@@ -28,15 +29,23 @@ class Bird:
         # preventing the bird from falling too quickly
         if self.velocity_y >= TERMINAL_VELOCITY:
             self.velocity_y = TERMINAL_VELOCITY
-            
-        if hitbox.bottom >= HEIGHT:
+
+        # stops the bird if it hits the floor 
+        if hitbox.bottom >= HEIGHT and self.velocity_y > 0:  
             self.velocity_y = 0
             self.centre_y = HEIGHT - self.radius
+        # stops the bird if it hits the ceiling
+        if hitbox.top <= 0 and self.velocity_y < 0:
+            self.velocity_y = 0
+            self.centre_y = self.radius
+            
+    def jump(self):
+        self.velocity_y = JUMP_STRENGTH
         
     def hitbox(self) -> pygame.Rect:
         return pygame.Rect(
             self.centre_x - self.radius,  # left
             self.centre_y - self.radius,  # right
-            2*self.radius,  # width
-            2*self.radius  # height
+            2 * self.radius,  # width
+            2 * self.radius  # height
         )
