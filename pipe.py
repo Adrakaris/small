@@ -9,7 +9,7 @@ class PipePair:
     gap_y is the top of the gap, gap_height is the size of the gap, the rest 
     of the column are all pipes
     """
-    def __init__(self, x_pos:int, gap_y:int, gap_height:int):
+    def __init__(self, x_pos:float, gap_y:int, gap_height:int):
         self.x_pos = x_pos
         self.gap_y = gap_y
         self.gap_height = gap_height
@@ -19,6 +19,9 @@ class PipePair:
         top, bottom = self.hitbox()
         pygame.draw.rect(screen, "darkgreen", top)
         pygame.draw.rect(screen, "darkgreen", bottom)
+
+    def move(self, speed:float):
+        self.x_pos -= speed
         
 
     def hitbox(self) -> tuple[pygame.Rect, pygame.Rect]:
