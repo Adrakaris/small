@@ -1,6 +1,7 @@
+import random
 import pygame
 
-from constants import HEIGHT, PIPE_WIDTH
+from constants import HEIGHT, PIPE_WIDTH, WIDTH
 
 class PipePair:
     """
@@ -22,7 +23,6 @@ class PipePair:
 
     def move(self, speed:float):
         self.x_pos -= speed
-        
 
     def hitbox(self) -> tuple[pygame.Rect, pygame.Rect]:
         """Returns two hitboxes: the top pipe, and the bottom pipe"""
@@ -43,3 +43,16 @@ class PipePair:
         
         return (top_pipe, bottom_pipe)
 
+
+
+highest_gap_y = 80
+lowest_gap_y = 380
+possible_gap_widths = [300, 230, 270]
+
+def create_pipe() -> PipePair:
+    """randomly generate a pipe configuration"""
+    return PipePair(
+        WIDTH,  # pipe starts off the right edge of the screen
+        random.randint(highest_gap_y, lowest_gap_y),  # top of the gap
+        random.choice(possible_gap_widths)
+    )
