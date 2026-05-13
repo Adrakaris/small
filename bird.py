@@ -1,6 +1,7 @@
 import pygame
 
-from constants import HEIGHT 
+from constants import HEIGHT
+from pipe import PipePair 
 
 HITBOX_RADIUS = 30
 GRAVITY = 0.5  # pixels per frame^2
@@ -49,3 +50,14 @@ class Bird:
             2 * self.radius,  # width
             2 * self.radius  # height
         )
+
+    def has_hit_pipe(self, pipe_list:list[PipePair]) -> bool:
+        bird_hitbox = self.hitbox()
+
+        for pipe in pipe_list:
+            pipe_hitbox = pipe.hitbox()
+            hit = bird_hitbox.colliderect(pipe_hitbox[0]) or bird_hitbox.colliderect(pipe_hitbox[1]) 
+            if hit:
+                return True
+
+        return False

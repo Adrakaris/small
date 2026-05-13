@@ -58,6 +58,9 @@ while not done:
     
     # draw stuff!
     screen.fill("white")  # todo: hex codes
+
+    if bird.has_hit_pipe(pipes):
+        screen.fill(0xf09b95)
     
     for pipe in pipes:
         pipe.draw(screen)
