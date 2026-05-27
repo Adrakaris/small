@@ -37,6 +37,14 @@ def manage_pipes():
     if pipes_x < -PIPE_WIDTH:
         pipes.pop(0)
 
+
+def reset_game():
+    # Don't use it unless you know what you're doing
+    global bird, pipes
+    
+    bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
+    pipes = []
+
 # =======
 
 done = False 
@@ -51,16 +59,19 @@ while not done:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 bird.jump()
+            if event.key == pygame.K_ESCAPE:
+                reset_game()
     
     # update logic and physics
-    bird.update()
-    manage_pipes()
+    if not bird.dead:
+        bird.update(pipes)
+        manage_pipes()
     
     # draw stuff!
     screen.fill("white")  # todo: hex codes
 
-    if bird.has_hit_pipe(pipes):
-        screen.fill(0xf09b95)
+    if bird.dead:
+        screen.fill(0xff7777)
     
     for pipe in pipes:
         pipe.draw(screen)
