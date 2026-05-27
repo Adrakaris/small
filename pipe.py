@@ -15,6 +15,7 @@ class PipePair:
         self.gap_y = gap_y
         self.gap_height = gap_height
         self.width = PIPE_WIDTH
+        self.passed = False
         
     def draw(self, screen:pygame.Surface):
         top, bottom = self.hitbox()

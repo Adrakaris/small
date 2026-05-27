@@ -65,3 +65,12 @@ class Bird:
                 return True
 
         return False
+
+    def has_passed_pipe(self, pipe_list:list[PipePair]) -> bool:
+        """Returns true if the bird has passed any of these pipes for the first time"""
+        hitbox = self.hitbox()
+        for pipe in pipe_list:
+            if not pipe.passed and hitbox.x > pipe.x_pos + pipe.width:
+                pipe.passed = True
+                return True 
+        return False

@@ -2,21 +2,29 @@ import pygame
 
 from bird import Bird
 from constants import FRAMERATE, HEIGHT, PIPE_WIDTH, WIDTH
-from pipe import create_pipe
+from pipe import PipePair, create_pipe
 
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock() 
 
-
+GAME_FONT = pygame.font.SysFont("Hack", 24)
 BIRD_STARTING_X = 480
 BIRD_STARTING_Y = HEIGHT // 2
 GAP_BETWEEN_PIPES = 300
 
 pipe_speed = 4
 bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
-pipes = []
+pipes:list[PipePair] = []
+score = 0
+
+# rendering fonts (generating text using fonts) is EXPENSIVE (uses a lot of computing power)
+# AVOID doing it every frame if at all possible (reuse existing surface when it doesn't need to be changed)
+def update_score_text() -> pygame.Surface:
+    return GAME_FONT.render(f"Score: {score}", True, "black")
+ 
+score_text = update_score_text()
 
 # =====
 
@@ -40,10 +48,12 @@ def manage_pipes():
 
 def reset_game():
     # Don't use it unless you know what you're doing
-    global bird, pipes
+    global bird, pipes, score, score_text
     
     bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
     pipes = []
+    score = 0
+    score_text = update_score_text()
 
 # =======
 
@@ -66,6 +76,10 @@ while not done:
     if not bird.dead:
         bird.update(pipes)
         manage_pipes()
+
+        if bird.has_passed_pipe(pipes):
+            score += 1
+            score_text = update_score_text()
     
     # draw stuff!
     screen.fill("white")  # todo: hex codes
@@ -76,6 +90,10 @@ while not done:
     for pipe in pipes:
         pipe.draw(screen)
     bird.draw(screen)
+
+    # gets a rectangle that fits the score text centered at the specified coords
+    score_text_hitbox = score_text.get_rect(center=(WIDTH // 2, 48))
+    screen.blit(score_text, score_text_hitbox)
     
     pygame.display.flip()
     clock.tick(FRAMERATE)    
