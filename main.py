@@ -18,13 +18,16 @@ pipe_speed = 4
 bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
 pipes:list[PipePair] = []
 score = 0
+score_text = pygame.Surface((0,0))  # placeholder value
 
 # rendering fonts (generating text using fonts) is EXPENSIVE (uses a lot of computing power)
 # AVOID doing it every frame if at all possible (reuse existing surface when it doesn't need to be changed)
-def update_score_text() -> pygame.Surface:
-    return GAME_FONT.render(f"Score: {score}", True, "black")
- 
-score_text = update_score_text()
+def set_score(new_score:int):
+    global score, score_text
+    score = new_score
+    score_text = GAME_FONT.render(f"Score: {score}", True, "black")
+
+set_score(0)    
 
 # =====
 
@@ -52,8 +55,7 @@ def reset_game():
     
     bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
     pipes = []
-    score = 0
-    score_text = update_score_text()
+    set_score(0)
 
 # =======
 
@@ -78,8 +80,7 @@ while not done:
         manage_pipes()
 
         if bird.has_passed_pipe(pipes):
-            score += 1
-            score_text = update_score_text()
+            set_score(score + 1)
     
     # draw stuff!
     screen.fill("white")  # todo: hex codes
