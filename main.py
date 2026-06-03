@@ -1,18 +1,18 @@
 import pygame
 
+from constants import FRAMERATE, HEIGHT, PIPE_WIDTH, WIDTH, GAME_FONT
 from bird import Bird
-from constants import FRAMERATE, HEIGHT, PIPE_WIDTH, WIDTH
 from pipe import PipePair, create_pipe
-
-pygame.init()
+from game_over_screen import GameOverScreen
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock() 
 
-GAME_FONT = pygame.font.SysFont("Hack", 24)
 BIRD_STARTING_X = 480
 BIRD_STARTING_Y = HEIGHT // 2
 GAP_BETWEEN_PIPES = 300
+
+game_over_screen = GameOverScreen()
 
 pipe_speed = 4
 bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
@@ -95,6 +95,9 @@ while not done:
     # gets a rectangle that fits the score text centered at the specified coords
     score_text_hitbox = score_text.get_rect(center=(WIDTH // 2, 48))
     screen.blit(score_text, score_text_hitbox)
+
+    if bird.dead:
+        game_over_screen.draw(screen)
     
     pygame.display.flip()
     clock.tick(FRAMERATE)    
