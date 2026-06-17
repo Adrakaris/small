@@ -12,50 +12,62 @@ BIRD_STARTING_X = 480
 BIRD_STARTING_Y = HEIGHT // 2
 GAP_BETWEEN_PIPES = 300
 
+class GameState:
+    def __init__(self) -> None:
+        self.pipe_speed = 4
+        self.bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
+        self.pipes:list[PipePair] = []
+        self.score = 0
+        self.score_text = pygame.Surface((0, 0))
+        
+        self.set_score(0)
+
+    def set_score(self, new_score:int):
+        self.score = new_score
+        self.score_text = GAME_FONT.render(f"Score: {self.score}", True, "black") 
+
+    def reset(self):
+        self.bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
+        self.pipes.clear()
+        self.set_score(0)
+
+    def is_dead(self) -> bool:
+        return self.bird.dead
+
+    def update_bird(self):
+        self.bird.update(self.pipes)
+
+        if self.bird.has_passed_pipe(self.pipes):
+            self.set_score(self.score + 1)
+
+        self.update_pipe_speed()
+
+    def update_pipe_speed(self):
+        """Every 20 points, increase pipe speed by 0.5"""
+        self.pipe_speed = 4 + 0.5 * (self.score // 20)
+
+    def manage_pipes(self):
+        """Generation, moving, and deleting of pipes"""
+        # 1. move the pipes
+        for pipe in self.pipes:
+            pipe.move(self.pipe_speed)
+    
+        # 2. generate the pipes
+        can_generate_new_pipe = len(self.pipes) == 0 or WIDTH - self.pipes[-1].x_pos >= GAP_BETWEEN_PIPES + PIPE_WIDTH
+        if can_generate_new_pipe:
+            new_pipe = create_pipe()
+            self.pipes.append(new_pipe)
+        
+        # 3. delete unused pipes
+        pipes_x = self.pipes[0].x_pos
+        if pipes_x < -PIPE_WIDTH:
+            self.pipes.pop(0)
+
+    
+    
+
+game = GameState()
 game_over_screen = GameOverScreen()
-
-pipe_speed = 4
-bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
-pipes:list[PipePair] = []
-score = 0
-score_text = pygame.Surface((0,0))  # placeholder value
-
-# rendering fonts (generating text using fonts) is EXPENSIVE (uses a lot of computing power)
-# AVOID doing it every frame if at all possible (reuse existing surface when it doesn't need to be changed)
-def set_score(new_score:int):
-    global score, score_text
-    score = new_score
-    score_text = GAME_FONT.render(f"Score: {score}", True, "black")
-
-set_score(0)    
-
-# =====
-
-def manage_pipes():
-    """Generation, moving, and deleting of pipes"""
-    # 1. move the pipes
-    for pipe in pipes:
-        pipe.move(pipe_speed)
-
-    # 2. generate the pipes
-    can_generate_new_pipe = len(pipes) == 0 or WIDTH - pipes[-1].x_pos >= GAP_BETWEEN_PIPES + PIPE_WIDTH
-    if can_generate_new_pipe:
-        new_pipe = create_pipe()
-        pipes.append(new_pipe)
-    
-    # 3. delete unused pipes
-    pipes_x = pipes[0].x_pos
-    if pipes_x < -PIPE_WIDTH:
-        pipes.pop(0)
-
-
-def reset_game():
-    # Don't use it unless you know what you're doing
-    global bird, pipes, score, score_text
-    
-    bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
-    pipes = []
-    set_score(0)
 
 # =======
 
@@ -70,33 +82,30 @@ while not done:
             done = True
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                bird.jump()
+                game.bird.jump()
             if event.key == pygame.K_ESCAPE:
-                reset_game()
+                game.reset()
     
     # update logic and physics
-    if not bird.dead:
-        bird.update(pipes)
-        manage_pipes()
-
-        if bird.has_passed_pipe(pipes):
-            set_score(score + 1)
+    if not game.is_dead():
+        game.update_bird()
+        game.manage_pipes()
     
     # draw stuff!
     screen.fill("white")  # todo: hex codes
 
-    if bird.dead:
+    if game.is_dead():
         screen.fill(0xff7777)
     
-    for pipe in pipes:
+    for pipe in game.pipes:
         pipe.draw(screen)
-    bird.draw(screen)
+    game.bird.draw(screen)
 
     # gets a rectangle that fits the score text centered at the specified coords
-    score_text_hitbox = score_text.get_rect(center=(WIDTH // 2, 48))
-    screen.blit(score_text, score_text_hitbox)
+    score_text_hitbox = game.score_text.get_rect(center=(WIDTH // 2, 48))
+    screen.blit(game.score_text, score_text_hitbox)
 
-    if bird.dead:
+    if game.is_dead():
         game_over_screen.draw(screen)
     
     pygame.display.flip()
