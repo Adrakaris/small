@@ -17,16 +17,27 @@ class GameState:
         self.pipe_speed = 4
         self.bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
         self.pipes:list[PipePair] = []
+        
         self.score = 0
         self.score_text = pygame.Surface((0, 0))
-        
+        self.high_score = 0
+        self.high_score_text = pygame.Surface((0, 0))
+
+        self.set_high_score(0)
         self.set_score(0)
 
     def set_score(self, new_score:int):
         self.score = new_score
         self.score_text = GAME_FONT.render(f"Score: {self.score}", True, "black") 
 
+    def set_high_score(self, new_high_score:int):
+        self.high_score = new_high_score
+        self.high_score_text = GAME_FONT.render(f"High: {self.high_score}", True, "grey")
+
     def reset(self):
+        if self.score > self.high_score:
+            self.set_high_score(self.score)
+        
         self.bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
         self.pipes.clear()
         self.set_score(0)
@@ -104,6 +115,8 @@ while not done:
     # gets a rectangle that fits the score text centered at the specified coords
     score_text_hitbox = game.score_text.get_rect(center=(WIDTH // 2, 48))
     screen.blit(game.score_text, score_text_hitbox)
+    highscore_text_hitbox = game.high_score_text.get_rect(topright=(WIDTH - 36, 36))
+    screen.blit(game.high_score_text, highscore_text_hitbox)
 
     if game.is_dead():
         game_over_screen.draw(screen)
