@@ -4,6 +4,7 @@ from constants import FRAMERATE, HEIGHT, PIPE_WIDTH, WIDTH, GAME_FONT
 from bird import Bird
 from pipe import PipePair, create_pipe
 from game_over_screen import GameOverScreen
+from utils import scale_to_new_size
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock() 
@@ -22,6 +23,9 @@ class GameState:
         self.score_text = pygame.Surface((0, 0))
         self.high_score = 0
         self.high_score_text = pygame.Surface((0, 0))
+
+        self.background = scale_to_new_size(pygame.image.load("assets/background.png"), new_height=HEIGHT)
+        self.background_rect = self.background.get_rect()
 
         try: 
             with open("highscore.txt", "r") as score_file:
@@ -111,7 +115,7 @@ while not done:
         game.manage_pipes()
     
     # draw stuff!
-    screen.fill("white")  # todo: hex codes
+    screen.blit(game.background, game.background_rect, game.background.get_rect())
 
     if game.is_dead():
         screen.fill(0xff7777)
