@@ -23,7 +23,13 @@ class GameState:
         self.high_score = 0
         self.high_score_text = pygame.Surface((0, 0))
 
-        self.set_high_score(0)
+        try: 
+            with open("highscore.txt", "r") as score_file:
+                saved_score = int(score_file.read())
+            self.set_high_score(saved_score)
+        except Exception:
+            self.set_high_score(0)
+        
         self.set_score(0)
 
     def set_score(self, new_score:int):
@@ -37,6 +43,8 @@ class GameState:
     def reset(self):
         if self.score > self.high_score:
             self.set_high_score(self.score)
+            with open("highscore.txt", "w") as score_file:
+                score_file.write(str(self.high_score))
         
         self.bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
         self.pipes.clear()
