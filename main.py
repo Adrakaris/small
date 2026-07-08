@@ -116,9 +116,6 @@ while not done:
     
     # draw stuff!
     screen.blit(game.background, game.background_rect, game.background.get_rect())
-
-    if game.is_dead():
-        screen.fill(0xff7777)
     
     for pipe in game.pipes:
         pipe.draw(screen)

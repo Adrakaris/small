@@ -1,6 +1,3 @@
-
-from curses import newwin
-
 import pygame 
 
 def scale_to_new_size(image:pygame.Surface, new_width:int|None=None, new_height:int|None=None) -> pygame.Surface:
