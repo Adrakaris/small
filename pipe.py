@@ -2,8 +2,12 @@ import random
 import pygame
 
 from constants import HEIGHT, PIPE_WIDTH, WIDTH
+from utils import scale_to_new_size
 
 class PipePair:
+    pipe_top = scale_to_new_size(pygame.image.load("assets/pipe-downwards.png"), new_width=PIPE_WIDTH)
+    pipe_bottom = scale_to_new_size(pygame.image.load("assets/pipe-upwards.png"), new_width=PIPE_WIDTH)
+    
     """
     A pair of pipes that the bird should pass through
     
@@ -19,8 +23,11 @@ class PipePair:
         
     def draw(self, screen:pygame.Surface):
         top, bottom = self.hitbox()
-        pygame.draw.rect(screen, "darkgreen", top)
-        pygame.draw.rect(screen, "darkgreen", bottom)
+
+        pipe_top_destination = self.pipe_top.get_rect(bottomleft=top.bottomleft)
+        screen.blit(self.pipe_top, pipe_top_destination)
+        pipe_bottom_destination = self.pipe_bottom.get_rect(topleft=bottom.topleft)
+        screen.blit(self.pipe_bottom, pipe_bottom_destination)
 
     def move(self, speed:float):
         self.x_pos -= speed

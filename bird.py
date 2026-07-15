@@ -1,7 +1,8 @@
 import pygame
 
 from constants import HEIGHT
-from pipe import PipePair 
+from pipe import PipePair
+from utils import scale_to_new_size 
 
 HITBOX_RADIUS = 30
 GRAVITY = 0.5  # pixels per frame^2
@@ -10,6 +11,9 @@ JUMP_STRENGTH = -10  # up is negative
 
 
 class Bird:
+    bird_flap_neutral = scale_to_new_size(pygame.image.load("assets/bird-flap-neutral.png"), new_width=int(HITBOX_RADIUS*2.5))
+    bird_flap_up = scale_to_new_size(pygame.image.load("assets/bird-flap-up.png"), new_width=int(HITBOX_RADIUS*2.5))
+    bird_flap_down = scale_to_new_size(pygame.image.load("assets/bird-flap-down.png"), new_width=int(HITBOX_RADIUS*2.5))
     
     def __init__(self, inital_x:int, initial_y: int) -> None:
         self.centre_x = inital_x
@@ -19,7 +23,13 @@ class Bird:
         self.dead = False
         
     def draw(self, screen:pygame.Surface):
-        pygame.draw.rect(screen, "red", self.hitbox())
+        bird_image_destination = self.bird_flap_neutral.get_rect(center=(self.centre_x, self.centre_y))
+        if abs(self.velocity_y) < 3:
+            screen.blit(self.bird_flap_neutral, bird_image_destination)
+        elif self.velocity_y <= -3:
+            screen.blit(self.bird_flap_down, bird_image_destination)
+        elif self.velocity_y >= 3:
+            screen.blit(self.bird_flap_up, bird_image_destination)
         
     def update(self, pipes:list[PipePair]):
         hitbox = self.hitbox()

@@ -1,0 +1,53 @@
+pipe.png = 100 kB
+
+class Pipe:
+    - x pos = 4 B
+    - y pos = 4 B
+    - other data = 72 B
+
+------
+
+1a. How large is the image pipe.png?
+    => 100 kB
+1b. How large is the class Pipe?
+    => 80 B
+
+1c. suppose I did this:
+        class Pipe:
+            - x pos
+            - y pos
+            - other data
+            - image = load(pipe.png)
+    How large is the class Pipe now?
+    => 100.08 kB
+
+1d. If I had 100 pipes on the screen, how much memory does it take to load 100 pipes without the image field?
+    => 8 kB
+
+1e. If I had 100 pipes on the screen, with the image field added as in 1c, how much memory does it take?
+    => 10.008 MB
+
+-----
+
+[pipe.png] = 100 kB
+
+pipe_texture = load(pipe.png)  # 100 kB
+
+class Pipe:
+    - x pos : 4 B
+    - y pos : 4 B
+    - other data : 72 B
+    - image = pipe_texture : 4 B
+
+---
+
+2a. How large is the class Pipe now?
+    => 84 B
+2b. If we have 1 pipe (and the image loaded), how much memory are we using?
+    => 100 kB + 84 B
+2c. If I had 100 pipes (and the image loaded), how much memory are we using?
+    => 100kB + 8.4 kB = 108.4 kB
+
+---
+
+TLDR: load your images ONCE and not for every object
