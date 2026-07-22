@@ -23,7 +23,7 @@ class Bird:
         self.dead = False
         
     def draw(self, screen:pygame.Surface):
-        bird_image_destination = self.bird_flap_neutral.get_rect(center=(self.centre_x, self.centre_y))
+        bird_image_destination = self.bird_flap_neutral.get_rect(center=(self.centre_x, self.centre_y - 5))
         if abs(self.velocity_y) < 3:
             screen.blit(self.bird_flap_neutral, bird_image_destination)
         elif self.velocity_y <= -3:
