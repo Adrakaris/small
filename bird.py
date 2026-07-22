@@ -1,3 +1,4 @@
+import math
 import pygame
 
 from constants import HEIGHT
@@ -8,6 +9,9 @@ HITBOX_RADIUS = 30
 GRAVITY = 0.5  # pixels per frame^2
 TERMINAL_VELOCITY = 10
 JUMP_STRENGTH = -10  # up is negative
+JUMP_ACCELERATION = -6  # up is negative
+JUMP_ACCELERATION_DECAY = 1/3  # every frame, acceleration is reduced to 1/3 its original value
+# first frame -6, second frame -2, then -2/3
 
 
 class Bird:
@@ -20,23 +24,30 @@ class Bird:
         self.centre_y = initial_y
         self.radius = HITBOX_RADIUS
         self.velocity_y = 0
+        self.acceleration_y = 0
         self.dead = False
+        self.game_speed = 1
         
     def draw(self, screen:pygame.Surface):
-        bird_image_destination = self.bird_flap_neutral.get_rect(center=(self.centre_x, self.centre_y - 5))
         if abs(self.velocity_y) < 3:
-            screen.blit(self.bird_flap_neutral, bird_image_destination)
+            image_to_draw = self.bird_flap_neutral
         elif self.velocity_y <= -3:
-            screen.blit(self.bird_flap_down, bird_image_destination)
-        elif self.velocity_y >= 3:
-            screen.blit(self.bird_flap_up, bird_image_destination)
+            image_to_draw = self.bird_flap_down
+        else:
+            image_to_draw = self.bird_flap_up
+
+        image_to_draw = pygame.transform.rotate(image_to_draw, math.degrees(math.atan(-self.velocity_y / self.game_speed / 2)))
+        bird_image_destination = image_to_draw.get_rect(center=(self.centre_x, self.centre_y - 5))
+
+        screen.blit(image_to_draw, bird_image_destination)
         
     def update(self, pipes:list[PipePair]):
         hitbox = self.hitbox()
-        
         # since y increases as you go down, we ADD to go down 
         self.centre_y += self.velocity_y
         self.velocity_y += GRAVITY
+        self.velocity_y += self.acceleration_y
+        self.acceleration_y *= JUMP_ACCELERATION_DECAY
         
         # preventing the bird from falling too quickly
         if self.velocity_y >= TERMINAL_VELOCITY:
@@ -55,7 +66,11 @@ class Bird:
             self.dead = True
             
     def jump(self):
-        self.velocity_y = JUMP_STRENGTH
+        self.velocity_y = 0
+        self.acceleration_y = JUMP_ACCELERATION
+
+    def set_game_speed(self, new_speed:float):
+        self.game_speed = new_speed
         
     def hitbox(self) -> pygame.Rect:
         return pygame.Rect(

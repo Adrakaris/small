@@ -59,6 +59,7 @@ class GameState:
 
     def update_bird(self):
         self.bird.update(self.pipes)
+        self.bird.set_game_speed(self.pipe_speed)
 
         if self.bird.has_passed_pipe(self.pipes):
             self.set_score(self.score + 1)
