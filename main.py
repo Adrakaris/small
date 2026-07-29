@@ -13,7 +13,7 @@ BIRD_STARTING_X = 480
 BIRD_STARTING_Y = HEIGHT // 2
 GAP_BETWEEN_PIPES = 300
 
-class GameState:
+class Game:
     def __init__(self) -> None:
         self.pipe_speed = 4
         self.bird = Bird(BIRD_STARTING_X, BIRD_STARTING_Y)
@@ -35,6 +35,32 @@ class GameState:
             self.set_high_score(0)
         
         self.set_score(0)
+
+    def handle_events(self, events:list[pygame.event.Event]):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.bird.jump()
+                if event.key == pygame.K_ESCAPE:
+                    self.reset()
+
+    def update(self):
+        if not self.is_dead():
+            self.update_bird()
+            self.manage_pipes()
+
+    def draw(self, screen:pygame.SurfaceType):
+        # draw stuff!
+        screen.blit(self.background, self.background_rect, self.background.get_rect())
+        for pipe in self.pipes:
+            pipe.draw(screen)
+        self.bird.draw(screen)
+    
+        # gets a rectangle that fits the score text centered at the specified coords
+        score_text_hitbox = self.score_text.get_rect(center=(WIDTH // 2, 48))
+        screen.blit(self.score_text, score_text_hitbox)
+        highscore_text_hitbox = self.high_score_text.get_rect(topright=(WIDTH - 36, 36))
+        screen.blit(self.high_score_text, highscore_text_hitbox)
 
     def set_score(self, new_score:int):
         self.score = new_score
@@ -90,7 +116,7 @@ class GameState:
     
     
 
-game = GameState()
+game = Game()
 game_over_screen = GameOverScreen()
 
 # =======
@@ -101,32 +127,17 @@ while not done:
     # game loop
     
     # process player events
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    
+    for event in events:
         if event.type == pygame.QUIT:
-            done = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                game.bird.jump()
-            if event.key == pygame.K_ESCAPE:
-                game.reset()
-    
-    # update logic and physics
-    if not game.is_dead():
-        game.update_bird()
-        game.manage_pipes()
-    
-    # draw stuff!
-    screen.blit(game.background, game.background_rect, game.background.get_rect())
-    
-    for pipe in game.pipes:
-        pipe.draw(screen)
-    game.bird.draw(screen)
+            done = True 
+            
+    game.handle_events(events)
 
-    # gets a rectangle that fits the score text centered at the specified coords
-    score_text_hitbox = game.score_text.get_rect(center=(WIDTH // 2, 48))
-    screen.blit(game.score_text, score_text_hitbox)
-    highscore_text_hitbox = game.high_score_text.get_rect(topright=(WIDTH - 36, 36))
-    screen.blit(game.high_score_text, highscore_text_hitbox)
+    game.update()
+    
+    game.draw(screen)
 
     if game.is_dead():
         game_over_screen.draw(screen)
