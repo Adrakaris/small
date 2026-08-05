@@ -29,9 +29,10 @@ class Game:
 
     def draw(self, screen:pygame.SurfaceType):
         """Draws things to the screen. Make sure to convert to screen coordinates"""
+        camera = self.camera
         screen.fill("black")
 
-        sr = self.camera.screen(Rect(0, 0, 16, 10))
+        sr = camera.screen(Rect(0, 0, 16, 10))
         pygame.draw.rect(screen, "red", sr, width=3)
 
 
