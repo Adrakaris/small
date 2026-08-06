@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import overload, Tuple
+from typing import overload 
 
-import pygame
 from pygame import Rect, Vector2
 
 from constants import Pair
@@ -15,7 +14,7 @@ class Camera:
     screen_size: Pair
     centre: Pair = Pair(0, 0)
 
-    def set_screen_size(self, new_size:Tuple[int, int]):
+    def set_screen_size(self, new_size:tuple[int, int]):
         self.screen_size = Pair.of(new_size)
 
     @overload
@@ -25,9 +24,9 @@ class Camera:
     @overload
     def screen(self, unit:Rect) -> Rect: ...
     @overload
-    def screen(self, unit:float|int) -> float: ...
+    def screen(self, unit:float) -> float: ...
 
-    def screen(self, unit:Pair|Rect|Vector2|float|int):
+    def screen(self, unit:Pair|Rect|Vector2|float):
         """
         Converts world coordinates to screen coordinates, 
         scaled to the size of the screen, maintaining aspect
@@ -61,9 +60,9 @@ class Camera:
     @overload
     def world(self, unit:Rect) -> Rect: ...
     @overload
-    def world(self, unit:float|int) -> float: ...
+    def world(self, unit:float) -> float: ...
     
-    def world(self, unit:Pair|Rect|Vector2|float|int):
+    def world(self, unit:Pair|Rect|Vector2|float):
         """
         Converts screen coordinates to world coordinates,
         scaled to the size of the world, maintaining aspect

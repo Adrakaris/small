@@ -1,5 +1,5 @@
 import pygame
-from pygame import VIDEORESIZE, Vector2, Rect
+from pygame import Rect
 
 from camera import Camera
 from constants import Pair
