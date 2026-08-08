@@ -5,6 +5,7 @@ from camera import Camera
 from components.button import Button
 from constants import BACKGROUND, BLACK, GREEN, RED, FloatRect, Pair
 from graph import Graph
+from model import Model
 from text import DynamicFont, Text
 
 FPS = 60
@@ -31,6 +32,8 @@ class Game:
         self.labels = [run_button_label, clear_button_label]
 
         self.graph = Graph(FloatRect(0.25, 0.25, 15.5, 9.5))
+
+        self.model = Model()
 
 
     def handle_events(self, events:list[pygame.event.Event]):
@@ -67,9 +70,9 @@ class Game:
         self.graph.draw(screen, camera)
 
     def draw_line(self):
-        print(self.graph.get_normalised_points())
         self.graph.clear_line()
-        self.graph.set_line(0.25, 0.75)
+        start, end = self.model.fit(self.graph.get_normalised_points())
+        self.graph.set_line(start, end)
 
     def clear(self):
         self.graph.clear_points()
