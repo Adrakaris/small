@@ -33,3 +33,10 @@ class Pair(NamedTuple):
 
     def __repr__(self) -> str:
         return f"{{{self.x:.3f}, {self.y:.3f}}}"
+
+# COLOURS
+
+BACKGROUND = 0xd6d3d0
+BLACK = 0x000000
+RED = 0xd91e1e
+BLUE = 0x264ed1
