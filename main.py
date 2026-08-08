@@ -4,6 +4,7 @@ from pygame import Rect
 from camera import Camera
 from components.button import Button
 from constants import BACKGROUND, BLACK, GREEN, RED, FloatRect, Pair
+from graph import Graph
 from text import DynamicFont, Text
 
 FPS = 60
@@ -20,14 +21,16 @@ class Game:
         self.font = DynamicFont("assets/hack.ttf", 0.5)
         self.font.refresh(self.camera)
 
-        run_button = Button( FloatRect(16.25, 9.5, 3.5, 1.5), GREEN, RED,  self.boop )
+        run_button = Button( FloatRect(16.25, 8, 3.5, 1.5), GREEN, RED,  self.draw_line )
         run_button_label = Text(self.font, "Draw Line", BLACK, Pair(16.5, 9))
 
-        clear_button = Button( FloatRect(16.25, 7.75, 3.5, 1.5), GREEN, RED, self.boop )
+        clear_button = Button( FloatRect(16.25, 6.25, 3.5, 1.5), GREEN, RED, self.clear )
         clear_button_label = Text(self.font, "Clear", BLACK, Pair(16.5, 7.25))
 
         self.buttons = [run_button, clear_button]
         self.labels = [run_button_label, clear_button_label]
+
+        self.graph = Graph(FloatRect(0.25, 0.25, 15.5, 9.5))
 
 
     def handle_events(self, events:list[pygame.event.Event]):
@@ -38,12 +41,13 @@ class Game:
                 self.font.refresh(self.camera)
                 for label in self.labels:
                     label.refresh()
-                
             # if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            #     print(f"Mouse pressed at world coordinates {self.camera.world(Pair.of(pygame.mouse.get_pos()))}")
+            #     print(f"Mouse pressed at screen {pygame.mouse.get_pos()} world {self.camera.world(Pair.of(pygame.mouse.get_pos()))}")
 
             for button in self.buttons:
                 button.handle_event(event, self.camera)
+
+            self.graph.handle_event(event, self.camera)
 
     def update(self, dt:float):
         """Updates game logic"""
@@ -55,16 +59,21 @@ class Game:
         camera = self.camera
         screen.fill(BACKGROUND)
 
-        sr = camera.screen(FloatRect(0, 10, 16, 10))
-        pygame.draw.rect(screen, "red", sr, width=3)
-
         for button in self.buttons:
             button.draw(screen, camera)
         for label in self.labels:
             label.draw(screen, camera)
 
-    def boop(self):
-        print("boop!")
+        self.graph.draw(screen, camera)
+
+    def draw_line(self):
+        print(self.graph.get_normalised_points())
+        self.graph.clear_line()
+        self.graph.set_line(0.25, 0.75)
+
+    def clear(self):
+        self.graph.clear_points()
+        self.graph.clear_line()
 
 
 game = Game()

@@ -26,7 +26,7 @@ class Camera:
     @overload
     def screen(self, unit:float) -> float: ...
 
-    def screen(self, unit:Pair|FloatRect|Vector2|float):
+    def screen(self, unit:Pair|FloatRect|Vector2|float|tuple[float,float]):
         """
         Converts world coordinates to screen coordinates, 
         scaled to the size of the screen, maintaining aspect
@@ -45,12 +45,14 @@ class Camera:
                 y = (self.screen_size.y / 2) - (unit.y - self.centre.y) * scale
                 return Vector2(x, y)
             case FloatRect():
-                topleft = self.screen(Pair.of(unit.topleft))
-                bottomright = self.screen(Pair.of(unit.bottomright))
-                x = min(topleft.x, bottomright.x)
-                y = min(topleft.y, bottomright.y)
-                w = abs(topleft.x - bottomright.x)
-                h = abs(topleft.y - bottomright.y)
+                bottomleft = self.screen(unit.bottomleft)
+                topright = self.screen(unit.topright)
+            
+                x = min(bottomleft.x, topright.x)
+                y = min(bottomleft.y, topright.y)
+                w = abs(bottomleft.x - topright.x)
+                h = abs(bottomleft.y - topright.y)
+            
                 return Rect(x, y, w, h)
 
     @overload
@@ -83,8 +85,10 @@ class Camera:
             case Rect():
                 topleft = self.world(Pair.of(unit.topleft))
                 bottomright = self.world(Pair.of(unit.bottomright))
+            
                 x = min(topleft.x, bottomright.x)
                 y = min(topleft.y, bottomright.y)
                 w = abs(topleft.x - bottomright.x)
                 h = abs(topleft.y - bottomright.y)
+            
                 return FloatRect(x, y, w, h)

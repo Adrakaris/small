@@ -39,7 +39,11 @@ class Pair(NamedTuple):
 
 
 class FloatRect(NamedTuple):
-    """Rectangle used to store floating point coordinates in world coordinates (y-up)"""
+    """
+    Rectangle used to store floating point coordinates in world coordinates (y-up)
+
+    x and y are taken to be the BOTTOM LEFT corner
+    """
     x:float 
     y:float
     w:float
@@ -49,13 +53,28 @@ class FloatRect(NamedTuple):
         """Warning: will round to integral values"""
         return Rect(self.x, self.y, self.w, self.h)
 
-    @property
-    def topleft(self) -> tuple[float, float]:
-        return (self.x, self.y)
+    def tuple(self) -> tuple[float,float,float,float]:
+        return (self.x, self.y, self.w, self.h)
+
+    def collidepoint(self, point:Pair) -> bool:
+        return self.x <= point.x <= self.x + self.w \
+            and self.y <= point.y <= self.y + self.h
 
     @property
-    def bottomright(self) -> tuple[float, float]:
-        return (self.x + self.w, self.y - self.h)
+    def bottomleft(self) -> Pair:
+        return Pair(self.x, self.y)
+        
+    @property
+    def topleft(self) -> Pair:
+        return Pair(self.x, self.y + self.h)
+
+    @property
+    def bottomright(self) -> Pair:
+        return Pair(self.x + self.w, self.y)
+
+    @property 
+    def topright(self) -> Pair:
+        return Pair(self.x + self.w, self.y + self.h)
 
     @classmethod
     def of(cls, value:Rect) -> "FloatRect":
