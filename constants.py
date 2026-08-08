@@ -1,10 +1,10 @@
 from typing import NamedTuple, overload
 
-from pygame import Vector2
+from pygame import Color, Vector2, Rect
 
 # type definitions
 
-ColorTuple = tuple[int, int, int, int]
+ColorLike = tuple[int, int, int] | tuple[int, int, int, int] | int 
 
 # data classes
 
@@ -34,9 +34,46 @@ class Pair(NamedTuple):
     def __repr__(self) -> str:
         return f"{{{self.x:.3f}, {self.y:.3f}}}"
 
+
+class FloatRect(NamedTuple):
+    """Rectangle used to store floating point coordinates in world coordinates (y-up)"""
+    x:float 
+    y:float
+    w:float
+    h:float
+
+    def rect(self) -> Rect:
+        """Warning: will round to integral values"""
+        return Rect(self.x, self.y, self.w, self.h)
+
+    @property
+    def topleft(self) -> tuple[float, float]:
+        return (self.x, self.y)
+
+    @property
+    def bottomright(self) -> tuple[float, float]:
+        return (self.x + self.w, self.y - self.h)
+
+    @classmethod
+    def of(cls, value:Rect) -> "FloatRect":
+        return cls(value.x, value.y, value.w, value.h)
+    
+
 # COLOURS
 
-BACKGROUND = 0xd6d3d0
-BLACK = 0x000000
-RED = 0xd91e1e
-BLUE = 0x264ed1
+BACKGROUND = (214, 211, 208)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (217, 30, 30)
+GREEN = (76, 191, 63)
+BLUE = (38, 78, 209)
+
+def lighten(colour:Color|ColorLike, factor:float) -> Color:
+    """Blend the colour with white. Factor between 0 and 1."""
+    _colour = Color(colour)
+    return _colour.lerp(WHITE, factor)
+
+def darken(colour:Color|ColorLike, factor:float) -> Color:
+    """Blend the colour with black. Factor between 0 and 1."""
+    _colour = Color(colour)
+    return _colour.lerp(BLACK, factor)
