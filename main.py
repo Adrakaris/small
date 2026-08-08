@@ -2,10 +2,10 @@ import pygame
 from pygame import Rect
 
 from camera import Camera
-from constants import Pair
+from constants import BACKGROUND, Pair
 
-WIDTH = 1200
-HEIGHT = 960
+WIDTH = 1500
+HEIGHT = 750
 FPS = 60
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 
 class Game:
     def __init__(self) -> None:
-        self.camera = Camera(Pair(16, 10), Pair.of(screen.get_size()), centre=Pair(8, 5))
+        self.camera = Camera(Pair(20, 10), Pair.of(screen.get_size()), centre=Pair(10, 5))
 
     def handle_events(self, events:list[pygame.event.Event]):
         """Process all events in the event queue this cycle"""
@@ -30,7 +30,7 @@ class Game:
     def draw(self, screen:pygame.SurfaceType):
         """Draws things to the screen. Make sure to convert to screen coordinates"""
         camera = self.camera
-        screen.fill("black")
+        screen.fill(BACKGROUND)
 
         sr = camera.screen(Rect(0, 0, 16, 10))
         pygame.draw.rect(screen, "red", sr, width=3)
