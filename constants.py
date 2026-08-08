@@ -2,6 +2,12 @@ from typing import NamedTuple, overload
 
 from pygame import Vector2
 
+# type definitions
+
+ColorTuple = tuple[int, int, int, int]
+
+# data classes
+
 class Pair(NamedTuple):
     x:float
     y:float
