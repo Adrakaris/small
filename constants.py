@@ -4,7 +4,7 @@ from pygame import Color, Vector2, Rect
 
 # type definitions
 
-ColorLike = tuple[int, int, int] | tuple[int, int, int, int] | int 
+ColorLike = tuple[int, int, int] | tuple[int, int, int, int] | int | Color
 
 # data classes
 
@@ -14,6 +14,9 @@ class Pair(NamedTuple):
 
     def vec2(self) -> Vector2:
         return Vector2(self.x, self.y)
+
+    def intTuple(self) -> tuple[int,int]:
+        return (int(self.x), int(self.y))
 
     @classmethod
     @overload
@@ -68,12 +71,12 @@ RED = (217, 30, 30)
 GREEN = (76, 191, 63)
 BLUE = (38, 78, 209)
 
-def lighten(colour:Color|ColorLike, factor:float) -> Color:
+def lighten(colour:ColorLike, factor:float) -> Color:
     """Blend the colour with white. Factor between 0 and 1."""
     _colour = Color(colour)
     return _colour.lerp(WHITE, factor)
 
-def darken(colour:Color|ColorLike, factor:float) -> Color:
+def darken(colour:ColorLike, factor:float) -> Color:
     """Blend the colour with black. Factor between 0 and 1."""
     _colour = Color(colour)
     return _colour.lerp(BLACK, factor)

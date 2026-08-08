@@ -15,7 +15,7 @@ class Button:
 
     Give rect in world coordinates.
     """
-    def __init__(self, rect:FloatRect, on_colour:Color|ColorLike, off_colour:Color|ColorLike, action:Callable[[], Any]) -> None:
+    def __init__(self, rect:FloatRect, on_colour:ColorLike, off_colour:ColorLike, action:Callable[[], Any]) -> None:
         self.rect = rect
         self.on_colour = on_colour
         self.off_colour = off_colour
