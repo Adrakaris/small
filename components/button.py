@@ -1,7 +1,7 @@
 
 from typing import Any, Callable
 
-from pygame import Color, Rect, SurfaceType
+from pygame import SurfaceType
 import pygame
 from pygame.event import Event
 

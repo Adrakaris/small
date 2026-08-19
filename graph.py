@@ -1,10 +1,8 @@
 
 import pygame
-import pygame.gfxdraw
-from pygame.draw import aaline
 
 from camera import Camera
-from constants import BLACK, RED, WHITE, FloatRect, Pair
+from constants import BLACK, RED, FloatRect, Pair
 
 
 class Graph:

@@ -1,3 +1,10 @@
 [project]
 name = "New project"
 version = "1.0.0"
+
+[tool.basedpyright]
+reportUnusedCallResult = "none"
+reportImplicitOverride = "none"
+reportIncompatibleUnannotatedOverride = "error"
+reportUnannotatedClassAttribute = "none"
+reportExplicitAny = "information"
