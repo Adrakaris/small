@@ -1,8 +1,7 @@
 import pygame
-from pygame import Rect
 
 from camera import Camera
-from constants import Pair
+from constants import FloatRect, Pair
 
 WIDTH = 1200
 HEIGHT = 960
@@ -32,7 +31,7 @@ class Game:
         camera = self.camera
         screen.fill("black")
 
-        sr = camera.screen(Rect(0, 0, 16, 10))
+        sr = camera.screen(FloatRect(0, 0, 16, 10))
         pygame.draw.rect(screen, "red", sr, width=3)
 
 

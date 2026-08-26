@@ -3,7 +3,7 @@ from typing import overload
 
 from pygame import Rect, Vector2
 
-from constants import Pair
+from constants import FloatRect, Pair
 
 @dataclass
 class Camera:
@@ -22,11 +22,11 @@ class Camera:
     @overload
     def screen(self, unit:Vector2) -> Vector2: ...
     @overload
-    def screen(self, unit:Rect) -> Rect: ...
+    def screen(self, unit:FloatRect) -> Rect: ...
     @overload
     def screen(self, unit:float) -> float: ...
 
-    def screen(self, unit:Pair|Rect|Vector2|float):
+    def screen(self, unit:Pair|FloatRect|Vector2|float|tuple[float,float]):
         """
         Converts world coordinates to screen coordinates, 
         scaled to the size of the screen, maintaining aspect
@@ -44,13 +44,15 @@ class Camera:
                 x = (self.screen_size.x / 2) + (unit.x - self.centre.x) * scale
                 y = (self.screen_size.y / 2) - (unit.y - self.centre.y) * scale
                 return Vector2(x, y)
-            case Rect():
-                topleft = self.screen(Pair.of(unit.topleft))
-                bottomright = self.screen(Pair.of(unit.bottomright))
-                x = min(topleft.x, bottomright.x)
-                y = min(topleft.y, bottomright.y)
-                w = abs(topleft.x - bottomright.x)
-                h = abs(topleft.y - bottomright.y)
+            case FloatRect():
+                bottomleft = self.screen(unit.bottomleft)
+                topright = self.screen(unit.topright)
+            
+                x = min(bottomleft.x, topright.x)
+                y = min(bottomleft.y, topright.y)
+                w = abs(bottomleft.x - topright.x)
+                h = abs(bottomleft.y - topright.y)
+            
                 return Rect(x, y, w, h)
 
     @overload
@@ -58,7 +60,7 @@ class Camera:
     @overload
     def world(self, unit:Vector2) -> Vector2: ...
     @overload
-    def world(self, unit:Rect) -> Rect: ...
+    def world(self, unit:Rect) -> FloatRect: ...
     @overload
     def world(self, unit:float) -> float: ...
     
@@ -83,8 +85,10 @@ class Camera:
             case Rect():
                 topleft = self.world(Pair.of(unit.topleft))
                 bottomright = self.world(Pair.of(unit.bottomright))
+            
                 x = min(topleft.x, bottomright.x)
                 y = min(topleft.y, bottomright.y)
                 w = abs(topleft.x - bottomright.x)
                 h = abs(topleft.y - bottomright.y)
-                return Rect(x, y, w, h)
+            
+                return FloatRect(x, y, w, h)

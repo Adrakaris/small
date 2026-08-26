@@ -1,6 +1,12 @@
 from typing import NamedTuple, overload
 
-from pygame import Vector2
+from pygame import Color, Vector2, Rect
+
+# type definitions
+
+ColorLike = tuple[int, int, int] | tuple[int, int, int, int] | int | Color
+
+# data classes
 
 class Pair(NamedTuple):
     x:float
@@ -8,6 +14,9 @@ class Pair(NamedTuple):
 
     def vec2(self) -> Vector2:
         return Vector2(self.x, self.y)
+
+    def intTuple(self) -> tuple[int,int]:
+        return (int(self.x), int(self.y))
 
     @classmethod
     @overload
@@ -27,3 +36,66 @@ class Pair(NamedTuple):
 
     def __repr__(self) -> str:
         return f"{{{self.x:.3f}, {self.y:.3f}}}"
+
+
+class FloatRect(NamedTuple):
+    """
+    Rectangle used to store floating point coordinates in world coordinates (y-up)
+
+    x and y are taken to be the BOTTOM LEFT corner
+    """
+    x:float 
+    y:float
+    w:float
+    h:float
+
+    def rect(self) -> Rect:
+        """Warning: will round to integral values"""
+        return Rect(self.x, self.y, self.w, self.h)
+
+    def tuple(self) -> tuple[float,float,float,float]:
+        return (self.x, self.y, self.w, self.h)
+
+    def collidepoint(self, point:Pair) -> bool:
+        return self.x <= point.x <= self.x + self.w \
+            and self.y <= point.y <= self.y + self.h
+
+    @property
+    def bottomleft(self) -> Pair:
+        return Pair(self.x, self.y)
+        
+    @property
+    def topleft(self) -> Pair:
+        return Pair(self.x, self.y + self.h)
+
+    @property
+    def bottomright(self) -> Pair:
+        return Pair(self.x + self.w, self.y)
+
+    @property 
+    def topright(self) -> Pair:
+        return Pair(self.x + self.w, self.y + self.h)
+
+    @classmethod
+    def of(cls, value:Rect) -> "FloatRect":
+        return cls(value.x, value.y, value.w, value.h)
+    
+
+# COLOURS
+
+BACKGROUND = (214, 211, 208)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (217, 30, 30)
+GREEN = (76, 191, 63)
+BLUE = (38, 78, 209)
+
+def lighten(colour:ColorLike, factor:float) -> Color:
+    """Blend the colour with white. Factor between 0 and 1."""
+    _colour = Color(colour)
+    return _colour.lerp(WHITE, factor)
+
+def darken(colour:ColorLike, factor:float) -> Color:
+    """Blend the colour with black. Factor between 0 and 1."""
+    _colour = Color(colour)
+    return _colour.lerp(BLACK, factor)
