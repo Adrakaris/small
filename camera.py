@@ -26,7 +26,7 @@ class Camera:
     @overload
     def screen(self, unit:float) -> float: ...
 
-    def screen(self, unit:Pair|FloatRect|Vector2|float|tuple[float,float]):
+    def screen(self, unit:Pair|FloatRect|Vector2|float):
         """
         Converts world coordinates to screen coordinates, 
         scaled to the size of the screen, maintaining aspect
