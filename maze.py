@@ -11,7 +11,7 @@ MazeGrid = list[list[Tile]]
 Coord = tuple[int, int]
 
 class Maze:
-    def __init__(self, size:Coord, goal_location:Coord, start_location:Coord) -> None:
+    def __init__(self, size:Coord) -> None:
         """
         type Coord = tuple[int, int]
         
@@ -20,9 +20,8 @@ class Maze:
         start_location: (x, y)
         """
         self.size = size
-        self.goal_location = goal_location
-        self.start_location = start_location
         self.maze:MazeGrid = []
+        self.player_location = (1, 1)
 
         self.generate()
 
@@ -37,6 +36,18 @@ class Maze:
         self.walk_maze((1,1), maze)
         # 3. assign it to self
         self.maze = maze
+
+        # 4. set a goal position
+        possible_position = (x-2, y-2)
+        if self.get(possible_position) == Tile.WALL:
+            possible_position = (x-3, y-2)
+        if self.get(possible_position) == Tile.WALL:
+            possible_position = (x-2, y-3)
+        if self.get(possible_position) == Tile.WALL:
+            possible_position = (x-3, y-3)
+        if self.get(possible_position) == Tile.WALL:
+            raise ValueError(f"Cannot find a goal in this maze\n{self}")
+        maze[possible_position[1]][possible_position[0]] = Tile.GOAL
 
     def walk_maze(self, position:Coord, maze:MazeGrid):
         # 1. get all possible moves
@@ -108,14 +119,42 @@ class Maze:
         """Given an (x,y) coordinate, gets the tile from the maze"""
         return self.maze[coord[1]][coord[0]]  # maze[y, x]
 
+    def player(self) -> Coord:
+        """Returns the position of the player"""
+        return self.player_location
+
+    def move(self, x:int, y:int) -> bool:
+        """
+        Tries to move the player x spaces RIGHT and y spaces DOWN
+
+        Returns False if this is not possible (e.g. a wall)
+        """
+        current_x, current_y = self.player_location
+        
+        if not (0 <= current_x + x <= self.size[0]):
+            return False
+        if not (0 <= current_y + y <= self.size[1]):
+            return False
+        if self.get((current_x + x, current_y + y)) == Tile.WALL:
+            return False
+
+        self.player_location = (current_x + x, current_y + y)
+        return True
+
     def __repr__(self) -> str:
         return f"Maze size={self.size}\n" + "\n".join([
-            "".join([tile.value for tile in row])
-            for row in self.maze
+            "".join([tile.value if (x, y) != self.player_location else Tile.PLAYER.value for x, tile in enumerate(row) ])
+            for y, row in enumerate(self.maze)
         ])
 
 
 
 if __name__ == "__main__":
-    maze = Maze((10, 10), (1,1), (1,1))
+    maze = Maze((20, 20))
+    print(maze)
+    print()
+    print(maze.move(1, 0))
+    print(maze)
+    print()
+    print(maze.move(0, 1))
     print(maze)
